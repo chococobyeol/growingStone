@@ -130,7 +130,7 @@
               alt={stone.type}
             />
             <div class="stone-details">
-              <strong>{stone.type}</strong> - 사이즈: {stone.size.toFixed(2)} (총 성장 시간: {stone.totalElapsed || 0}초)
+              <strong>{stone.name}</strong> ({stone.type}) - 사이즈: {stone.size.toFixed(2)} (총 성장 시간: {stone.totalElapsed || 0}초)
               <small>(저장일: {new Date(stone.discovered_at).toLocaleString()})</small>
               {#if stone.id === $currentStone.id}
                 <span style="color: green; font-weight: bold;"> [현재 돌] </span>
@@ -140,8 +140,8 @@
           <div>
             {#if stone.id !== $currentStone.id}
               <button on:click={() => swapStone(stone)}>불러오기</button>
+              <button on:click={() => deleteStone(stone)}>삭제</button>
             {/if}
-            <button on:click={() => deleteStone(stone)}>삭제</button>
           </div>
         </li>
       {/each}

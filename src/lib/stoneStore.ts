@@ -3,33 +3,34 @@ import { writable } from 'svelte/store';
 export type StoneType = {
   id: string;
   type: string;
-  baseSize: number;    // 저장 또는 불러올 때 기준이 되는 돌 크기
+  baseSize: number;
   name: string;
   totalElapsed?: number;
 };
 
+const stoneTypes = [
+  'andesite',
+  'basalt',
+  'conglomerate',
+  'gneiss',
+  'granite',
+  'limestone',
+  'quartzite',
+  'sandstone',
+  'shale',
+  'tuff'
+];
+
 function getRandomStoneType() {
-  const stoneTypes = [
-    'andesite',
-    'basalt',
-    'conglomerate',
-    'gneiss',
-    'granite',
-    'limestone',
-    'quartzite',
-    'sandstone',
-    'shale',
-    'tuff'
-  ];
   return stoneTypes[Math.floor(Math.random() * stoneTypes.length)];
 }
 
-const defaultStone: StoneType = {
-  id: crypto.randomUUID(),
-  type: getRandomStoneType(),
-  baseSize: 1,
-  name: 'My Stone',
-  totalElapsed: 0
-};
+const initialType = getRandomStoneType();
 
-export const currentStone = writable<StoneType>(defaultStone);
+export const currentStone = writable<StoneType>({
+  id: crypto.randomUUID(),
+  type: initialType,
+  baseSize: 1,
+  totalElapsed: 0,
+  name: initialType
+});
