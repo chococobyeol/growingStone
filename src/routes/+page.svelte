@@ -23,6 +23,7 @@
   ];
 
   let computedSize = 1;
+  let countdown = 10; // 다음 돌 뽑기까지 남은 시간(초)
 
   function formatSize(num: number) {
     return num.toFixed(2);
@@ -133,7 +134,7 @@
 
   onMount(() => {
     loadUserStone();
-    const timer = setInterval(async () => {
+    const growthTimer = setInterval(async () => {
       currentStone.update(stone => {
         const oldElapsed = stone.totalElapsed || 0;
         const deltaX = growthFactor * Math.log((oldElapsed + 2) / (oldElapsed + 1));
@@ -145,7 +146,20 @@
       });
       await autoUpdateStone();
     }, 1000);
-    return () => clearInterval(timer);
+
+    // 10초마다 자동으로 돌 뽑기 & 남은 시간 표시
+    const countdownTimer = setInterval(() => {
+      countdown--;
+      if (countdown <= 0) {
+        drawStone();
+        countdown = 10;
+      }
+    }, 1000);
+
+    return () => {
+      clearInterval(growthTimer);
+      clearInterval(countdownTimer);
+    };
   });
 
   function logoutHandler() {
@@ -294,6 +308,7 @@
       <button class="btn" type="button" on:click|stopPropagation={drawStone}>
         돌 뽑기
       </button>
+      <p>다음 돌 획득까지: {countdown}초</p>
     </div>
   </div>
   {#if showMenu}
