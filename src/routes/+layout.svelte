@@ -30,12 +30,12 @@
 {:else}
   <!-- 이외의 경우(예, 루트 경로("/")에 접근 시 user가 없으면) -->
   <div class="auth-container">
-    <h1>돌 키우기에 오신 것을 환영합니다</h1>
-    <p>계속하려면 아래 옵션 중 하나를 선택하세요:</p>
+    <h1>Growing Stone</h1>
+    <p>grow your stone...</p>
     <div class="auth-buttons">
-      <a class="btn" href="/login">로그인</a>
-      <a class="btn" href="/register">회원가입</a>
-      <a class="btn" href="/guest">게스트로 시작</a>
+      <a class="btn" href="/login">Login</a>
+      <a class="btn" href="/register">Register</a>
+      <a class="btn" href="/guest">Continue as Guest</a>
     </div>
   </div>
 {/if}
