@@ -340,6 +340,8 @@
     width: 200px;
     height: auto;
     transition: transform 0.3s ease-in-out;
+    position: relative;
+    z-index: 0;
   }
   .stone-text {
     margin-top: 1rem;
@@ -381,6 +383,8 @@
     font-weight: bold;
     text-align: center;
     cursor: pointer;
+    position: relative;
+    z-index: 1;
   }
 </style>
 
