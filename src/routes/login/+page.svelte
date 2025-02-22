@@ -22,7 +22,7 @@
     }
   </script>
   
-  <h1>로그인</h1>
+  <h1>Login</h1>
   <label>
     Email:
     <input type="email" bind:value={email} />

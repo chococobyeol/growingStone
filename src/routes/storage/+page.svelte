@@ -113,12 +113,12 @@
 </script>
 
 <div>
-  <h1>보관함</h1>
+  <h1>Storage</h1>
   {#if errorMsg}
     <p style="color: red;">{errorMsg}</p>
   {/if}
   {#if storedStones.length === 0}
-    <p>저장된 돌이 없습니다.</p>
+    <p>No stored stones.</p>
   {:else}
     <ul>
       {#each storedStones as stone}
@@ -130,24 +130,24 @@
               alt={stone.type}
             />
             <div class="stone-details">
-              <strong>{stone.name}</strong> ({stone.type}) - 사이즈: {stone.size.toFixed(2)} (총 성장 시간: {stone.totalElapsed || 0}초)
-              <small>(저장일: {new Date(stone.discovered_at).toLocaleString()})</small>
+              <strong>{stone.name}</strong> ({stone.type}) - Size: {stone.size.toFixed(2)} (Total Growth Time: {stone.totalElapsed || 0}s)
+              <small>(Saved: {new Date(stone.discovered_at).toLocaleString()})</small>
               {#if stone.id === $currentStone.id}
-                <span style="color: green; font-weight: bold;"> [현재 돌] </span>
+                <span style="color: green; font-weight: bold;"> [Current Stone] </span>
               {/if}
             </div>
           </div>
           <div>
             {#if stone.id !== $currentStone.id}
-              <button on:click={() => swapStone(stone)}>불러오기</button>
-              <button on:click={() => deleteStone(stone)}>삭제</button>
+              <button on:click={() => swapStone(stone)}>Load</button>
+              <button on:click={() => deleteStone(stone)}>Throw away</button>
             {/if}
           </div>
         </li>
       {/each}
     </ul>
   {/if}
-  <button class="back-btn" on:click={() => goto('/')}>뒤로가기</button>
+  <button class="back-btn" on:click={() => goto('/')}>Back</button>
 </div>
 
 <style>

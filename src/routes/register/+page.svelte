@@ -1,6 +1,6 @@
 <script lang="ts">
     import { supabase } from '$lib/supabaseClient';
-  
+    import { goto } from '$app/navigation';
     let email = '';
     let password = '';
     let errorMsg = '';
@@ -16,11 +16,12 @@
         errorMsg = error.message;
       } else {
         // 회원가입 성공 처리 (예: 메인 페이지로 이동)
+        goto('/');
       }
     }
   </script>
   
-  <h1>회원가입</h1>
+  <h1>Register</h1>
   <label>
     Email:
     <input type="email" bind:value={email} />
