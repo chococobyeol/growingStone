@@ -23,10 +23,19 @@
   ];
 
   let computedSize = 1;
-  let countdown = 10; // 다음 돌 뽑기까지 남은 시간(초)
+  // countdown은 DB에 저장된 remaining_time 값을 사용 (초 단위)
+  let countdown = 0;
 
   function formatSize(num: number) {
     return num.toFixed(2);
+  }
+
+  // 초 단위의 시간을 "HH:MM:SS" 형식으로 변환하는 함수 (예: 01:23:45)
+  function formatTime(totalSeconds: number): string {
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
   }
 
   function randomizeStone() {
@@ -40,10 +49,10 @@
     }));
   }
 
-  // h1을 더블클릭하면 호출되어 돌 이름을 수정
+  // 돌 이름 수정 함수
   function editStoneName() {
     const stone = get(currentStone);
-    const newName = prompt('돌의 이름을 변경하세요:', stone.name);
+    const newName = prompt('Change the name of the stone:', stone.name);
     if (newName && newName.trim() !== '') {
       currentStone.set({ ...stone, name: newName });
     }
@@ -53,11 +62,9 @@
    * 2) 메뉴 (배경 클릭)
    * ===================== */
   let showMenu = false;
-
   function toggleMenu() {
     showMenu = !showMenu;
   }
-
   function handleBackgroundKeydown(e: KeyboardEvent) {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
@@ -104,7 +111,7 @@
   }
 
   /* =====================
-   * 4) onMount - 돌 성장 로직 (증분 업데이트 방식)
+   * 4) 돌 성장 및 자동 저장 로직
    * ===================== */
   async function autoUpdateStone() {
     const stone = get(currentStone);
@@ -132,33 +139,98 @@
     }
   }
 
+  /* =====================
+   * 5) 타이머 관련 DB 연동 함수 (프로필 테이블의 remaining_time 사용)
+   * ===================== */
+  async function loadRemainingTime(): Promise<number | null> {
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+    if (sessionError) {
+      console.error("세션 로드 실패:", sessionError);
+      return null;
+    }
+    if (!sessionData?.session?.user) {
+      console.error("로그인된 사용자가 없습니다.");
+      return null;
+    }
+    const userId = sessionData.session.user.id;
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('remaining_time')
+      .eq('id', userId)
+      .single();
+    if (error) {
+      console.error("남은 시간 불러오기 실패:", error);
+      return null;
+    }
+    return data.remaining_time;
+  }
+
+  async function updateRemainingTime(newTime: number) {
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+    if (sessionError) {
+      console.error("세션 로드 실패 (update remaining time):", sessionError);
+      return;
+    }
+    if (!sessionData?.session?.user) {
+      console.error("로그인된 사용자가 없습니다. (update remaining time)");
+      return;
+    }
+    const userId = sessionData.session.user.id;
+    const { error } = await supabase
+      .from('profiles')
+      .update({ remaining_time: newTime })
+      .eq('id', userId);
+    if (error) {
+      console.error("남은 시간 업데이트 실패:", error);
+    }
+  }
+
+  /* =====================
+   * 6) onMount - 돌 성장 및 타이머 로직 (페이지 활성상태일 때만 시간 진행)
+   * ===================== */
   onMount(() => {
     loadUserStone();
-    const growthTimer = setInterval(async () => {
+
+    // DB에서 남은 시간을 로드. 값이 없거나 0 이하이면 3600초(1시간)로 초기화.
+    (async () => {
+      const dbRemaining = await loadRemainingTime();
+      if (dbRemaining === null || dbRemaining <= 0) {
+        countdown = 3600;
+        updateRemainingTime(3600);
+      } else {
+        countdown = dbRemaining;
+      }
+    })();
+
+    // 1초마다 돌을 성장시키고, 남은 시간을 1초씩 감소시킵니다.
+    const timer = setInterval(() => {
+      // 돌 성장 업데이트
       currentStone.update(stone => {
         const oldElapsed = stone.totalElapsed || 0;
         const deltaX = growthFactor * Math.log((oldElapsed + 2) / (oldElapsed + 1));
-        // 0.8 ~ 1.2 사이의 랜덤 변동 추가
         const randomFactor = 0.4 * Math.random() + 0.8;
         const newSize = stone.baseSize + deltaX * randomFactor;
         computedSize = newSize;
         return { ...stone, baseSize: newSize, totalElapsed: oldElapsed + 1 };
       });
-      await autoUpdateStone();
-    }, 1000);
+      autoUpdateStone();
 
-    // 10초마다 자동으로 돌 뽑기 & 남은 시간 표시
-    const countdownTimer = setInterval(() => {
-      countdown--;
-      if (countdown <= 0) {
-        drawStone();
-        countdown = 10;
+      // 남은 시간 1초 감소 (돌을 성장시키는 동안에만 시간 감소)
+      if (countdown > 0) {
+        countdown--;
+        updateRemainingTime(countdown);
+        if (countdown <= 0) {
+          // 남은 시간이 0이 되면 돌 뽑기 실행 후 3600초(1시간)로 리셋
+          drawStone().then(() => {
+            countdown = 3600;
+            updateRemainingTime(3600);
+          });
+        }
       }
     }, 1000);
 
     return () => {
-      clearInterval(growthTimer);
-      clearInterval(countdownTimer);
+      clearInterval(timer);
     };
   });
 
@@ -302,13 +374,10 @@
         }}>
         {$currentStone.name}
       </button>
-      <p>Current size: {formatSize(computedSize)}</p>
-      <p>Current stone type: {$currentStone.type}</p>
-      <p>총 성장 시간: {$currentStone.totalElapsed || 0}초</p>
-      <button class="btn" type="button" on:click|stopPropagation={drawStone}>
-        돌 뽑기
-      </button>
-      <p>다음 돌 획득까지: {countdown}초</p>
+      <p>Size: {formatSize(computedSize)}</p>
+      <p>Type: {$currentStone.type}</p>
+      <p>Total Growth Time: {$currentStone.totalElapsed || 0}s</p>
+      <p>Next stone in: {formatTime(countdown)}</p>
     </div>
   </div>
   {#if showMenu}
@@ -317,11 +386,11 @@
       role="dialog"
       aria-modal="true"
       aria-label="Menu">
-      <button class="btn" on:click={() => goto('/storage')}>보관함</button>
-      <button class="btn">도움말</button>
-      <button class="btn">설정</button>
-      <button class="btn">마켓</button>
-      <button class="btn" on:click={logoutHandler}>로그아웃</button>
+      <button class="btn" on:click={() => goto('/storage')}>Storage</button>
+      <button class="btn">Help</button>
+      <button class="btn">Settings</button>
+      <button class="btn">Market</button>
+      <button class="btn" on:click={logoutHandler}>Logout</button>
     </div>
   {/if}
 </div>
