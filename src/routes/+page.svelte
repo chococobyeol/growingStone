@@ -106,7 +106,46 @@
         };
         currentStone.set(loadedStone);
         computedSize = loadedStone.baseSize;
+      } else {
+        // 저장된 돌이 없으면 drawStone을 호출하여 새 돌을 뽑고 currentStone에 설정하도록 처리
+        await drawStoneAndSetCurrent();
       }
+    }
+  }
+
+  async function drawStoneAndSetCurrent() {
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+    if (sessionError) {
+      console.error("세션 로드 실패:", sessionError);
+      return;
+    }
+    if (!sessionData?.session?.user) {
+      console.error("로그인된 사용자가 없습니다.");
+      return;
+    }
+    const randomType = stoneTypes[Math.floor(Math.random() * stoneTypes.length)];
+    const newStone = {
+      id: crypto.randomUUID(),
+      type: randomType,
+      size: 1,
+      name: randomType,
+      discovered_at: new Date().toISOString(),
+      user_id: sessionData.session.user.id,
+      totalElapsed: 0
+    };
+    const { data, error } = await supabase.from('stones').insert(newStone).select();
+    if (error) {
+      console.error("돌 뽑기 실패:", error);
+    } else if (data && data.length > 0) {
+      const createdStone = data[0];
+      currentStone.set({
+        id: createdStone.id,
+        type: createdStone.type,
+        baseSize: createdStone.size,
+        totalElapsed: createdStone.totalElapsed || 0,
+        name: createdStone.name
+      });
+      computedSize = createdStone.size;
     }
   }
 
