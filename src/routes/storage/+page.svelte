@@ -130,7 +130,7 @@
               alt={stone.type}
             />
             <div class="stone-details">
-              <strong>{stone.name}</strong> ({stone.type}) - Size: {stone.size.toFixed(2)} (Total Growth Time: {stone.totalElapsed || 0}s)
+              <strong>{stone.name}</strong> ({stone.type}) - Size: {stone.size.toFixed(4)} (Total Growth Time: {stone.totalElapsed || 0}s)
               <small>(Saved: {new Date(stone.discovered_at).toLocaleString()})</small>
               {#if stone.id === $currentStone.id}
                 <span style="color: green; font-weight: bold;"> [Current Stone] </span>

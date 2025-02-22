@@ -27,7 +27,7 @@
   let countdown = 0;
 
   function formatSize(num: number) {
-    return num.toFixed(2);
+    return num.toFixed(4);
   }
 
   // 초 단위의 시간을 "HH:MM:SS" 형식으로 변환하는 함수 (예: 01:23:45)
