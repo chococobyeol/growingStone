@@ -5,6 +5,7 @@
   import { currentStone } from '$lib/stoneStore';
   import { get } from 'svelte/store';
   import { t } from 'svelte-i18n';
+  import type { RealtimeChannel } from '@supabase/supabase-js';
 
   /* =====================
    * 1) 돌 정보 & 성장 로직
@@ -229,6 +230,8 @@
   /* =====================
    * 6) onMount - 돌 성장 및 타이머 로직 (페이지 활성상태일 때만 시간 진행)
    * ===================== */
+  let stonesSubscription: RealtimeChannel;
+
   onMount(() => {
     loadUserStone();
 
@@ -270,8 +273,40 @@
       }
     }, 1000);
 
+    // 현재 로그인 사용자의 ID 등을 사용해 구독 범위를 제한할 수도 있음.
+    // 예를 들어, userId 필드를 조건으로 걸어 줄 수 있습니다.
+    const stoneId = get(currentStone).id;
+
+    // Supabase v2의 realtime 채널 API 사용
+    stonesSubscription = supabase
+      .channel('stone-updates')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'stones',
+          filter: `id=eq.${stoneId}`
+        },
+        (payload: any) => {
+          console.log('실시간 돌 업데이트:', payload);
+          const updatedStone = payload.new;
+          if (updatedStone.id === stoneId) {
+            currentStone.set({
+              id: updatedStone.id,
+              type: updatedStone.type,
+              baseSize: updatedStone.size,
+              totalElapsed: updatedStone.totalElapsed || 0,
+              name: updatedStone.name
+            });
+          }
+        }
+      )
+      .subscribe();
+
     return () => {
       clearInterval(timer);
+      supabase.removeChannel(stonesSubscription);
     };
   });
 

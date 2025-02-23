@@ -5,6 +5,7 @@
   import { currentStone } from '$lib/stoneStore';
   import { get } from 'svelte/store';
   import { t } from 'svelte-i18n';
+  import type { RealtimeChannel } from '@supabase/supabase-js';
 
   // DB에 저장된 돌 데이터 타입 (DB의 size는 현재 돌의 baseSize에 해당)
   type Stone = {
@@ -18,6 +19,7 @@
 
   let storedStones: Stone[] = [];
   let errorMsg = '';
+  let stonesSubscription: RealtimeChannel;
 
   async function loadStoredStones() {
     const { data, error } = await supabase
@@ -109,7 +111,40 @@
   onMount(() => {
     loadStoredStones();
     window.addEventListener('keydown', handleKeydown);
-    return () => window.removeEventListener('keydown', handleKeydown);
+
+    // 실시간 구독: stones 테이블에서 INSERT, UPDATE, DELETE 이벤트 감지
+    stonesSubscription = supabase
+      .channel('stones-storage')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'stones' },
+        (payload: any) => {
+          console.log('Stone INSERT 이벤트:', payload);
+          loadStoredStones();
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'stones' },
+        (payload: any) => {
+          console.log('Stone UPDATE 이벤트:', payload);
+          loadStoredStones();
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: 'DELETE', schema: 'public', table: 'stones' },
+        (payload: any) => {
+          console.log('Stone DELETE 이벤트:', payload);
+          loadStoredStones();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      window.removeEventListener('keydown', handleKeydown);
+      supabase.removeChannel(stonesSubscription);
+    };
   });
 </script>
 
