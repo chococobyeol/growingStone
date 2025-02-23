@@ -9,10 +9,15 @@
 	import { goto } from '$app/navigation';
   
 	let user: User | null = null;
+	let logoutTriggered = false; // 로그아웃이 이미 실행되었는지 여부를 체크
   
 	// store 구독을 통해 로그인 상태를 받아옴
 	const unsubscribe = session.subscribe((currentSession) => {
 	  user = currentSession ? currentSession.user : null;
+	  // 세션이 사라지면 플래그 초기화
+	  if (!currentSession) {
+		logoutTriggered = false;
+	  }
 	});
   
 	onDestroy(() => {
@@ -25,15 +30,17 @@
 	async function logout() {
 	  const { data: sessionData } = await supabase.auth.getSession();
 	  if (!sessionData?.session) {
-		// 이미 세션이 없으면 바로 로그인 페이지로 이동
-		goto('/login');
+		goto('/'); // 홈 화면으로 이동
 		return;
+	  }
+	  if (activeSessionSubscription) {
+		supabase.removeChannel(activeSessionSubscription);
 	  }
 	  const { error } = await supabase.auth.signOut();
 	  if (error) {
 		console.error("로그아웃 실패:", error.message);
 	  }
-	  goto('/login');
+	  goto('/'); // 로그아웃 후 홈 화면으로 이동
 	}
   
 	// activeSessionSubscription 변수의 타입을 명시합니다.
@@ -54,10 +61,11 @@
 		  (payload: any) => {
 			const newActiveSession = payload.new.active_session;
 			const localActiveSession = localStorage.getItem('activeSession');
-			if (localActiveSession && localActiveSession !== newActiveSession) {
+			// logoutTriggered가 false일 때 한 번만 실행하도록 처리
+			if (localActiveSession && localActiveSession !== newActiveSession && !logoutTriggered) {
+			  logoutTriggered = true;
 			  alert("다른 기기에서 로그인되었습니다. 현재 기기는 로그아웃됩니다.");
 			  logout();
-			  goto('/login');
 			}
 		  }
 		)
