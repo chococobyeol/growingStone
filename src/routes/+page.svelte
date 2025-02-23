@@ -318,7 +318,6 @@
       console.log("로그아웃 성공");
       goto('/login'); // 로그아웃 후 로그인 페이지로 이동
     }
-
   }
 
   async function saveStone() {
@@ -395,8 +394,17 @@
     margin: 0.5rem 0;
   }
   .btn {
-    margin: 0.5rem;
     padding: 0.5rem 1rem;
+    color: #000;
+    background-color: #B7DDBF;
+    border: 1px solid #DDDDDD;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin: 0.5rem;
+  }
+  .btn:hover {
+    background-color: #A3CBB1;
   }
   .menu-overlay {
     position: absolute;
@@ -408,6 +416,9 @@
     padding: 1rem;
     animation: fadeDown 0.3s ease forwards;
     z-index: 9;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
   }
   @keyframes fadeDown {
     0% {
@@ -430,6 +441,13 @@
     cursor: pointer;
     position: relative;
     z-index: 1;
+  }
+  .menu-overlay .btn.logout-btn {
+    background-color: #F88A87;
+    margin-left: auto;
+  }
+  .menu-overlay .btn.logout-btn:hover {
+    background-color: #E27675;
   }
 </style>
 
@@ -474,12 +492,11 @@
       role="dialog"
       aria-modal="true"
       aria-label="Menu">
-
       <button class="btn" on:click={() => goto('/storage')}>{$t('storage')}</button>
       <button class="btn">{$t('market')}</button>
       <button class="btn">{$t('help')}</button>
       <button class="btn" on:click={() => goto('/settings')}>{$t('settings')}</button>
-      <button class="btn" on:click={logoutHandler}>{$t('logout')}</button>
+      <button class="btn logout-btn" on:click={logoutHandler}>{$t('logout')}</button>
     </div>
   {/if}
 </div>
