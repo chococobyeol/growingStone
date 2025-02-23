@@ -2,7 +2,7 @@
 	import { session } from '$lib/authStore';
 	import { supabase } from '$lib/supabaseClient';
 	import type { User, RealtimeChannel } from '@supabase/supabase-js';
-	import { onDestroy } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import { page } from '$app/stores';
 	import '../lib/i18n';
 	import { t } from 'svelte-i18n';
@@ -92,6 +92,37 @@
 	onDestroy(() => {
 	  if (activeSessionSubscription) {
 		supabase.removeChannel(activeSessionSubscription);
+	  }
+	});
+
+	// 추가: 폴링 기능을 통해 주기적으로 active_session 값을 체크
+	onMount(() => {
+	  const interval = setInterval(async () => {
+		if (user) {
+		  const { data: sessionData } = await supabase.auth.getSession();
+		  if (!sessionData?.session?.user) return;
+		  const userId = sessionData.session.user.id;
+		  const { data: profileData, error } = await supabase
+			.from('profiles')
+			.select('active_session')
+			.eq('id', userId)
+			.single();
+		  if (error) {
+			console.error("프로필의 active_session 로드 실패:", error.message);
+			return;
+		  }
+		  const newActiveSession = profileData.active_session;
+		  const localActiveSession = localStorage.getItem('activeSession');
+		  if (localActiveSession && localActiveSession !== newActiveSession && !logoutTriggered) {
+			logoutTriggered = true;
+			alert("다른 기기에서 로그인되었습니다. 현재 기기는 로그아웃됩니다.");
+			logout();
+		  }
+		}
+	  }, 5000); // 5초마다 체크
+
+	  return () => {
+		clearInterval(interval);
 	  }
 	});
 </script>
