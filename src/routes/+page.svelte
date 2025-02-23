@@ -333,6 +333,7 @@
     padding: 2rem 1rem;
   }
   .stone-image-wrapper {
+    margin-top: 10vh;
     display: flex;
     justify-content: center;
   }
