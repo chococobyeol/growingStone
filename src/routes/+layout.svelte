@@ -23,7 +23,17 @@
 	const authRoutes = ['/login', '/register', '/guest'];
   
 	async function logout() {
-	  await supabase.auth.signOut();
+	  const { data: sessionData } = await supabase.auth.getSession();
+	  if (!sessionData?.session) {
+		// 이미 세션이 없으면 바로 로그인 페이지로 이동
+		goto('/login');
+		return;
+	  }
+	  const { error } = await supabase.auth.signOut();
+	  if (error) {
+		console.error("로그아웃 실패:", error.message);
+	  }
+	  goto('/login');
 	}
   
 	// activeSessionSubscription 변수의 타입을 명시합니다.
