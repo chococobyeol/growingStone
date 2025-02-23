@@ -1,11 +1,12 @@
 <script lang="ts">
 	import { session } from '$lib/authStore';
 	import { supabase } from '$lib/supabaseClient';
-	import type { User } from '@supabase/supabase-js';
+	import type { User, RealtimeChannel } from '@supabase/supabase-js';
 	import { onDestroy } from 'svelte';
 	import { page } from '$app/stores';
 	import '../lib/i18n';
 	import { t } from 'svelte-i18n';
+	import { goto } from '$app/navigation';
   
 	let user: User | null = null;
   
@@ -24,6 +25,45 @@
 	async function logout() {
 	  await supabase.auth.signOut();
 	}
+  
+	// activeSessionSubscription 변수의 타입을 명시합니다.
+	let activeSessionSubscription: RealtimeChannel | null = null;
+  
+	$: if (user) {
+	  const userId = user.id;
+	  activeSessionSubscription = supabase
+		.channel('active-session')
+		.on(
+		  'postgres_changes',
+		  {
+			event: 'UPDATE',
+			schema: 'public',
+			table: 'profiles',
+			filter: `id=eq.${userId}`
+		  },
+		  (payload: any) => {
+			const newActiveSession = payload.new.active_session;
+			const localActiveSession = localStorage.getItem('activeSession');
+			if (localActiveSession && localActiveSession !== newActiveSession) {
+			  alert("다른 기기에서 로그인되었습니다. 현재 기기는 로그아웃됩니다.");
+			  logout();
+			  goto('/login');
+			}
+		  }
+		)
+		.subscribe();
+	} else {
+	  // user가 없을 때 기존 구독이 있다면 구독 해제
+	  if (activeSessionSubscription) {
+		supabase.removeChannel(activeSessionSubscription);
+	  }
+	}
+  
+	onDestroy(() => {
+	  if (activeSessionSubscription) {
+		supabase.removeChannel(activeSessionSubscription);
+	  }
+	});
 </script>
 
 {#if user || authRoutes.includes($page.url.pathname)}
