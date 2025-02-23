@@ -4,6 +4,7 @@
   import { goto } from '$app/navigation';
   import { currentStone } from '$lib/stoneStore';
   import { get } from 'svelte/store';
+  import { t } from 'svelte-i18n';
 
   // DB에 저장된 돌 데이터 타입 (DB의 size는 현재 돌의 baseSize에 해당)
   type Stone = {
@@ -113,12 +114,12 @@
 </script>
 
 <div>
-  <h1>Storage</h1>
+  <h1>{$t('storage')}</h1>
   {#if errorMsg}
     <p style="color: red;">{errorMsg}</p>
   {/if}
   {#if storedStones.length === 0}
-    <p>No stored stones.</p>
+    <p>{$t('noStoredStones')}</p>
   {:else}
     <ul>
       {#each storedStones as stone}
@@ -127,27 +128,27 @@
             <img
               class="stone-img"
               src={`/assets/img/common/${stone.type}.png`}
-              alt={stone.type}
+              alt={$t(`stoneTypes.${stone.type}`)}
             />
             <div class="stone-details">
-              <strong>{stone.name}</strong> ({stone.type}) - Size: {stone.size.toFixed(4)} (Total Growth Time: {stone.totalElapsed || 0}s)
-              <small>(Saved: {new Date(stone.discovered_at).toLocaleString()})</small>
+              <strong>{stone.name}</strong> ({$t(`stoneTypes.${stone.type}`)}) - {$t('sizeLabel')}: {stone.size.toFixed(4)} ({$t('totalGrowthTimeLabel')}: {stone.totalElapsed || 0}s)
+              <small>({$t('savedAt')}: {new Date(stone.discovered_at).toLocaleString()})</small>
               {#if stone.id === $currentStone.id}
-                <span style="color: green; font-weight: bold;"> [Current Stone] </span>
+                <span style="color: green; font-weight: bold;"> {$t('currentStoneTag')} </span>
               {/if}
             </div>
           </div>
           <div>
             {#if stone.id !== $currentStone.id}
-              <button on:click={() => swapStone(stone)}>Load</button>
-              <button on:click={() => deleteStone(stone)}>Throw away</button>
+              <button on:click={() => swapStone(stone)}>{$t('loadButton')}</button>
+              <button on:click={() => deleteStone(stone)}>{$t('throwAwayButton')}</button>
             {/if}
           </div>
         </li>
       {/each}
     </ul>
   {/if}
-  <button class="back-btn" on:click={() => goto('/')}>Back</button>
+  <button class="back-btn" on:click={() => goto('/')}>{$t('backButton')}</button>
 </div>
 
 <style>

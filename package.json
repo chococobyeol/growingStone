@@ -41,6 +41,7 @@
 		"vitest": "^3.0.0"
 	},
 	"dependencies": {
-		"@supabase/supabase-js": "^2.48.1"
+		"@supabase/supabase-js": "^2.48.1",
+		"svelte-i18n": "^4.0.1"
 	}
 }

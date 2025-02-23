@@ -1,0 +1,32 @@
+{
+  "greeting": "안녕하세요",
+  "message": "우리 사이트에 오신 것을 환영합니다",
+  "changeStoneNamePrompt": "돌의 이름을 변경하세요:",
+  "sizeLabel": "크기",
+  "typeLabel": "종류",
+  "totalGrowthTimeLabel": "총 성장 시간",
+  "nextStoneInLabel": "다음 돌까지",
+  "storage": "보관함",
+  "market": "마켓",
+  "help": "도움말",
+  "settings": "설정",
+  "logout": "로그아웃",
+  "noStoredStones": "저장된 돌이 없습니다.",
+  "savedAt": "저장됨",
+  "currentStoneTag": "[현재 돌]",
+  "loadButton": "불러오기",
+  "throwAwayButton": "버리기",
+  "backButton": "뒤로",
+  "stoneTypes": {
+    "andesite": "안산암",
+    "basalt": "현무암",
+    "conglomerate": "역암",
+    "gneiss": "편마암",
+    "granite": "화강암",
+    "limestone": "석회암",
+    "quartzite": "규암",
+    "sandstone": "사암",
+    "shale": "셰일",
+    "tuff": "응회암"
+  }
+}

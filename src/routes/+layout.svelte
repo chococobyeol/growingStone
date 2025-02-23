@@ -4,6 +4,8 @@
 	import type { User } from '@supabase/supabase-js';
 	import { onDestroy } from 'svelte';
 	import { page } from '$app/stores';
+	import '../lib/i18n';
+	import { t } from 'svelte-i18n';
   
 	let user: User | null = null;
   

@@ -4,6 +4,7 @@
   import { goto } from '$app/navigation';
   import { currentStone } from '$lib/stoneStore';
   import { get } from 'svelte/store';
+  import { t } from 'svelte-i18n';
 
   /* =====================
    * 1) 돌 정보 & 성장 로직
@@ -49,10 +50,11 @@
     }));
   }
 
-  // 돌 이름 수정 함수
+  // 돌 이름 수정 함수 (번역 적용)
   function editStoneName() {
     const stone = get(currentStone);
-    const newName = prompt('Change the name of the stone:', stone.name);
+    const translate = get(t);
+    const newName = prompt(translate('changeStoneNamePrompt'), stone.name);
     if (newName && newName.trim() !== '') {
       currentStone.set({ ...stone, name: newName });
     }
@@ -418,10 +420,10 @@
         }}>
         {$currentStone.name}
       </button>
-      <p>Size: {formatSize(computedSize)}</p>
-      <p>Type: {$currentStone.type}</p>
-      <p>Total Growth Time: {$currentStone.totalElapsed || 0}s</p>
-      <p>Next stone in: {formatTime(countdown)}</p>
+      <p>{$t('sizeLabel')}: {formatSize(computedSize)}</p>
+      <p>{$t('typeLabel')}: {$t('stoneTypes.' + $currentStone.type)}</p>
+      <p>{$t('totalGrowthTimeLabel')}: {$currentStone.totalElapsed || 0}s</p>
+      <p>{$t('nextStoneInLabel')}: {formatTime(countdown)}</p>
     </div>
   </div>
   {#if showMenu}
@@ -430,11 +432,12 @@
       role="dialog"
       aria-modal="true"
       aria-label="Menu">
-      <button class="btn" on:click={() => goto('/storage')}>Storage</button>
-      <button class="btn">Help</button>
-      <button class="btn">Settings</button>
-      <button class="btn">Market</button>
-      <button class="btn" on:click={logoutHandler}>Logout</button>
+
+      <button class="btn" on:click={() => goto('/storage')}>{$t('storage')}</button>
+      <button class="btn">{$t('market')}</button>
+      <button class="btn">{$t('help')}</button>
+      <button class="btn" on:click={() => goto('/settings')}>{$t('settings')}</button>
+      <button class="btn" on:click={logoutHandler}>{$t('logout')}</button>
     </div>
   {/if}
 </div>

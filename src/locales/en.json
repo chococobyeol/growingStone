@@ -1,0 +1,32 @@
+{
+  "greeting": "Hello",
+  "message": "Welcome to our website",
+  "changeStoneNamePrompt": "Change the name of the stone:",
+  "sizeLabel": "Size",
+  "typeLabel": "Type",
+  "totalGrowthTimeLabel": "Total Growth Time",
+  "nextStoneInLabel": "Next stone in",
+  "storage": "Storage",
+  "market": "Market",
+  "help": "Help",
+  "settings": "Settings",
+  "logout": "Logout",
+  "noStoredStones": "No stored stones.",
+  "savedAt": "Saved",
+  "currentStoneTag": "[Current Stone]",
+  "loadButton": "Load",
+  "throwAwayButton": "Throw away",
+  "backButton": "Back",
+  "stoneTypes": {
+    "andesite": "Andesite",
+    "basalt": "Basalt",
+    "conglomerate": "Conglomerate",
+    "gneiss": "Gneiss",
+    "granite": "Granite",
+    "limestone": "Limestone",
+    "quartzite": "Quartzite",
+    "sandstone": "Sandstone",
+    "shale": "Shale",
+    "tuff": "Tuff"
+  }
+}
