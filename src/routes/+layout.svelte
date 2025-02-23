@@ -30,7 +30,10 @@
 	async function logout() {
 	  const { data: sessionData } = await supabase.auth.getSession();
 	  if (!sessionData?.session) {
-		goto('/'); // 홈 화면으로 이동
+		// 세션이 없는 경우에도 클라이언트 상태를 강제로 초기화
+		session.set(null);
+		localStorage.removeItem('activeSession');
+		goto('/');
 		return;
 	  }
 	  if (activeSessionSubscription) {
@@ -38,9 +41,18 @@
 	  }
 	  const { error } = await supabase.auth.signOut();
 	  if (error) {
-		console.error("로그아웃 실패:", error.message);
+		// 'Auth session missing!' 오류는 이미 세션이 없는 것으로 판단하여 무시
+		if (error.message === 'Auth session missing!') {
+		  console.warn("세션이 이미 만료되어 강제 로그아웃 처리합니다.");
+		} else {
+		  console.error("로그아웃 실패:", error.message);
+		  return;
+		}
 	  }
-	  goto('/'); // 로그아웃 후 홈 화면으로 이동
+	  // 클라이언트 상태 초기화 (세션, localStorage 등)
+	  session.set(null);
+	  localStorage.removeItem('activeSession');
+	  goto('/');
 	}
   
 	// activeSessionSubscription 변수의 타입을 명시합니다.
