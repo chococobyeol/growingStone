@@ -1,17 +1,18 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
   import { setLanguage } from '$lib/i18n';
+  import { t } from 'svelte-i18n';
 </script>
 
 <div class="settings-container">
-  <h1>Settings</h1>
-  <p>설정 페이지 내용입니다.</p>
+  <h1>{$t('settings')}</h1>
+  <p>{$t('settingsDescription')}</p>
   <div class="language-settings">
-    <h2>언어 설정</h2>
+    <h2>{$t('languageSettings')}</h2>
     <button on:click={() => setLanguage('en')}>English</button>
     <button on:click={() => setLanguage('ko')}>한국어</button>
   </div>
-  <button on:click={() => goto('/')}>Back</button>
+  <button on:click={() => goto('/')}>{$t('backButton')}</button>
 </div>
 
 <style>

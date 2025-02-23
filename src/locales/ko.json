@@ -10,6 +10,8 @@
   "market": "마켓",
   "help": "도움말",
   "settings": "설정",
+  "settingsDescription": "설정 페이지 내용입니다.",
+  "languageSettings": "언어 설정",
   "logout": "로그아웃",
   "noStoredStones": "저장된 돌이 없습니다.",
   "savedAt": "저장됨",

@@ -10,6 +10,8 @@
   "market": "Market",
   "help": "Help",
   "settings": "Settings",
+  "settingsDescription": "This is the settings page.",
+  "languageSettings": "Language Settings",
   "logout": "Logout",
   "noStoredStones": "No stored stones.",
   "savedAt": "Saved",
