@@ -38,5 +38,17 @@
   "comingSoon": "Coming soon.",
   "level": "Level",
   "xpLabel": "XP:",
-  "totalXp": "Total XP"
+  "totalXp": "Total XP",
+  "login": "Login",
+  "register": "Register",
+  "email": "Email",
+  "password": "Password",
+  "guest": "Continue as Guest",
+  "alreadyAccount": "Already have an account?",
+  "landingTitle": "Growing Stone",
+  "landingDescription": "Grow your stone...",
+  "korean": "한국어",
+  "english": "English",
+  "languageSettingsTitle": "Select Language",
+  "noAccount": "Don't have an account?"
 }

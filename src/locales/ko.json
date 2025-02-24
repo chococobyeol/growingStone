@@ -38,5 +38,17 @@
   "comingSoon": "준비중입니다.",
   "level": "레벨",
   "xpLabel": "경험치:",
-  "totalXp": "누적 경험치"
+  "totalXp": "누적 경험치",
+  "login": "로그인",
+  "register": "회원가입",
+  "email": "이메일",
+  "password": "비밀번호",
+  "guest": "Guest로 시작하기",
+  "alreadyAccount": "이미 계정이 있으신가요?",
+  "landingTitle": "돌 키우기",
+  "landingDescription": "돌을 키우세요...",
+  "korean": "한국어",
+  "english": "English",
+  "languageSettingsTitle": "언어 설정",
+  "noAccount": "계정이 없으신가요?"
 }

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { waitLocale } from 'svelte-i18n';
 	import { session } from '$lib/authStore';
 	import { supabase } from '$lib/supabaseClient';
 	import type { User, RealtimeChannel } from '@supabase/supabase-js';
@@ -6,7 +7,14 @@
 	import { page } from '$app/stores';
 	import '../lib/i18n';
 	import { t } from 'svelte-i18n';
+	import { setLanguage } from '$lib/i18n';
 	import { goto } from '$app/navigation';
+  
+	let localeReady = false;
+	// 번역 리소스 로딩 완료될 때까지 기다립니다.
+	waitLocale().then(() => {
+	  localeReady = true;
+	});
   
 	let user: User | null = null;
 	let logoutTriggered = false; // 로그아웃이 이미 실행되었는지 여부를 체크
@@ -127,41 +135,108 @@
 	});
 </script>
 
-{#if user || authRoutes.includes($page.url.pathname)}
-  <!-- 로그인 상태이거나 인증 전용 페이지 방문 시: 해당 페이지 내용을 렌더링 -->
-  <slot />
-{:else}
-  <!-- 이외의 경우(예, 루트 경로("/")에 접근 시 user가 없으면) -->
-  <div class="auth-container">
-    <h1>Growing Stone</h1>
-    <p>grow your stone...</p>
-    <div class="auth-buttons">
-      <a class="btn" href="/login">Login</a>
-      <a class="btn" href="/register">Register</a>
-      <a class="btn" href="/guest">Continue as Guest</a>
+{#if localeReady}
+  <!-- 번역 리소스가 로드된 경우에만 화면 표시 -->
+  {#if user || authRoutes.includes($page.url.pathname)}
+    <!-- 로그인 상태이거나 인증 전용 페이지 방문 시: 해당 페이지 내용을 렌더링 -->
+    <slot />
+  {:else}
+    <!-- 이외의 경우(예, 루트 경로("/")에 접근 시 user가 없으면) -->
+    <div class="landing-page">
+      <div class="landing-card">
+        <h1>{$t('landingTitle')}</h1>
+        <p>{$t('landingDescription')}</p>
+        <div class="landing-buttons">
+          <a class="btn" href="/login">{$t('login')}</a>
+          <a class="btn" href="/register">{$t('register')}</a>
+          <a class="btn" href="/guest">{$t('guest')}</a>
+        </div>
+        <div class="language-settings">
+          <span>{$t('languageSettingsTitle')}</span>
+          <button class="btn" on:click={() => setLanguage('ko')}>{$t('korean')}</button>
+          <button class="btn" on:click={() => setLanguage('en')}>{$t('english')}</button>
+        </div>
+      </div>
     </div>
-  </div>
+  {/if}
+{:else}
+  <!-- 번역이 아직 로딩 중일 때 간단한 로딩 메시지 표시 -->
+  <div>번역 로딩중...</div>
 {/if}
 
 <style>
-  .auth-container {
+  .landing-page {
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 100vh;
+    min-height: 100vh;
+    background: #f9f9f9;
+  }
+  .landing-card {
+    max-width: 400px;
+    width: 90%;
+    background: #fff;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     text-align: center;
   }
-  .auth-buttons {
+  .landing-card h1 {
+    margin-bottom: 1rem;
+    font-size: 2rem;
+  }
+  .landing-card p {
+    margin-bottom: 1.5rem;
+    font-size: 1.1rem;
+  }
+  .landing-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  .landing-buttons .btn {
+    padding: 0.5rem 1rem;
+    border: 1px solid #dddddd;
+    background-color: #b7ddbf;
+    color: #000;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin: 0.5rem;
+    font-size: 1rem;
+    text-decoration: none;
+    display: inline-block;
+  }
+  .landing-buttons .btn:hover {
+    background-color: #a3cbb1;
+  }
+  .language-settings {
     margin-top: 1rem;
     display: flex;
-    gap: 1rem;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
   }
-  .btn {
+  .language-settings span {
+    font-size: 1rem;
+    font-weight: bold;
+  }
+  .language-settings .btn {
     padding: 0.5rem 1rem;
-    background: #0070f3;
-    color: #fff;
-    text-decoration: none;
+    border: 1px solid #dddddd;
+    background-color: #b7ddbf;
+    color: #000;
     border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin: 0;
+    font-size: 1rem;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .language-settings .btn:hover {
+    background-color: #a3cbb1;
   }
 </style>
