@@ -351,6 +351,19 @@
       console.log("돌 뽑기 성공:", data);
     }
   }
+
+  let copyMessage: string = '';
+
+  function handleShare(): void {
+    navigator.clipboard.writeText(window.location.href)
+      .then(() => {
+        copyMessage = $t('linkCopied'); // 다국어 번역에 등록된 메시지 사용
+        setTimeout(() => {
+          copyMessage = "";
+        }, 3000);
+      })
+      .catch((err) => console.error("Failed to copy link:", err));
+  }
 </script>
 
 <style>
@@ -536,6 +549,19 @@
   .btn.icon-text-btn {
     padding: 0.1rem !important;
   }
+
+  .copy-message {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.7);
+    color: #fff;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    z-index: 1000;
+    font-size: 0.9rem;
+  }
 </style>
 
 <div
@@ -594,7 +620,10 @@
         </button>
       </div>
       <div class="menu-group help-group">
-        <button class="btn icon-btn" title="{$t('help')}" aria-label="{$t('help')}">
+        <button class="btn icon-btn" title="{$t('share')}" aria-label="{$t('share')}" on:click={handleShare}>
+          <img src="/assets/icons/share.png" alt="{$t('share')}" />
+        </button>
+        <button class="btn icon-btn" on:click={() => goto('/help')} title="{$t('help')}" aria-label="{$t('help')}">
           <img src="/assets/icons/help.png" alt="{$t('help')}" />
         </button>
         <button class="btn icon-btn" on:click={() => goto('/settings')} title="{$t('settings')}" aria-label="{$t('settings')}">
@@ -605,3 +634,7 @@
     </div>
   {/if}
 </div>
+
+{#if copyMessage}
+  <div class="copy-message">{copyMessage}</div>
+{/if}

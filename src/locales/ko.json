@@ -10,9 +10,10 @@
   "profile": "내 정보",
   "catalog": "돌 도감",
   "market": "마켓",
+  "share": "공유",
   "help": "도움말",
   "settings": "설정",
-  "settingsDescription": "설정 페이지 내용입니다.",
+  "settingsDescription": "설정 비슷한거...",
   "languageSettings": "언어 설정",
   "logout": "로그아웃",
   "noStoredStones": "저장된 돌이 없습니다.",
@@ -32,5 +33,7 @@
     "sandstone": "사암",
     "shale": "셰일",
     "tuff": "응회암"
-  }
+  },
+  "linkCopied": "링크가 복사되었습니다.",
+  "comingSoon": "준비중입니다."
 }

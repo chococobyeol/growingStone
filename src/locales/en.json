@@ -10,9 +10,10 @@
   "profile": "Profile",
   "catalog": "Catalog",
   "market": "Market",
+  "share": "Share",
   "help": "Help",
   "settings": "Settings",
-  "settingsDescription": "This is the settings page.",
+  "settingsDescription": "It seems like the settings page...",
   "languageSettings": "Language Settings",
   "logout": "Logout",
   "noStoredStones": "No stored stones.",
@@ -32,5 +33,7 @@
     "sandstone": "Sandstone",
     "shale": "Shale",
     "tuff": "Tuff"
-  }
+  },
+  "linkCopied": "Link copied!",
+  "comingSoon": "Coming soon."
 }
