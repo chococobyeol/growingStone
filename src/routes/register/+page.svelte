@@ -16,8 +16,8 @@
       if (error) {
         errorMsg = error.message;
       } else {
-        // 회원가입 성공 처리 (예: 메인 페이지로 이동)
-        goto('/');
+        // 회원가입 성공 후 로그인 페이지로 이동
+        goto('/login');
       }
     }
   </script>
