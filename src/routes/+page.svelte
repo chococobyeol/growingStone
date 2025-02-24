@@ -417,8 +417,33 @@
     animation: fadeDown 0.3s ease forwards;
     z-index: 9;
     display: flex;
-    flex-wrap: wrap;
-    align-items: center;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .menu-group.help-group {
+    order: 1;
+    gap: 0.25rem;
+  }
+  .menu-group.storage-group {
+    order: 2;
+  }
+  .menu-group {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+  @media (min-width: 600px) {
+    .menu-overlay {
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .menu-group.storage-group {
+      order: 1;
+    }
+    .menu-group.help-group {
+      order: 2;
+    }
   }
   @keyframes fadeDown {
     0% {
@@ -442,12 +467,74 @@
     position: relative;
     z-index: 1;
   }
-  .menu-overlay .btn.logout-btn {
+  .btn.logout-btn {
     background-color: #F88A87;
-    margin-left: auto;
   }
-  .menu-overlay .btn.logout-btn:hover {
+  .btn.logout-btn:hover {
     background-color: #E27675;
+  }
+
+  /* 아이콘 버튼 관련 스타일 */
+  .icon-btn {
+    padding: 0.25rem 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #fff !important;
+  }
+  
+  .icon-btn img {
+    display: block;
+    width: 20px;  /* 버튼 크기에 맞게 조정 (필요시 수정) */
+    height: 20px;
+  }
+
+  /* 설정/도움말 버튼의 테두리 제거 */
+  .btn.icon-btn {
+    border: none !important;
+  }
+
+  /* help-group 내의 버튼 간격 줄이기 */
+  .menu-group.help-group .btn {
+    margin: 0.1rem; /* 각 버튼의 외부 여백도 줄임 */
+  }
+
+  /* 보관함/마켓 (아이콘 텍스트 버튼) 스타일 수정 */
+  .icon-text-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 60px;           /* 정사각형 버튼 너비 */
+    height: 60px;          /* 정사각형 버튼 높이 */
+    background-color: #fff;
+    margin: 0.1rem;
+    border: 1px solid #CCC;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    box-sizing: border-box;
+  }
+  
+  .icon-text-btn:hover {
+    background-color: #f7f7f7;
+  }
+  
+  .icon-text-btn img {
+    display: block;
+    width: 34px;           /* 아이콘 이미지 크기 확대 */
+    height: 34px;
+  }
+  
+  .btn-label {
+    font-size: 0.8rem;
+    margin-top: 0.25rem;
+    color: #000;
+  }
+
+  /* 보관함/마켓 버튼의 패딩을 줄여서 내부 여백을 축소 */
+  .btn.icon-text-btn {
+    padding: 0.1rem !important;
   }
 </style>
 
@@ -487,16 +574,34 @@
     </div>
   </div>
   {#if showMenu}
-    <div
-      class="menu-overlay"
-      role="dialog"
-      aria-modal="true"
-      aria-label="Menu">
-      <button class="btn" on:click={() => goto('/storage')}>{$t('storage')}</button>
-      <button class="btn">{$t('market')}</button>
-      <button class="btn">{$t('help')}</button>
-      <button class="btn" on:click={() => goto('/settings')}>{$t('settings')}</button>
-      <button class="btn logout-btn" on:click={logoutHandler}>{$t('logout')}</button>
+    <div class="menu-overlay" role="dialog" aria-modal="true" aria-label="Menu">
+      <div class="menu-group storage-group">
+        <button class="btn icon-text-btn" on:click={() => goto('/storage')}>
+          <img src="/assets/icons/storage.png" alt="{$t('storage')}" />
+          <span class="btn-label">{$t('storage')}</span>
+        </button>
+        <button class="btn icon-text-btn" on:click={() => goto('/profile')}>
+          <img src="/assets/icons/profile.png" alt="{$t('profile')}" />
+          <span class="btn-label">{$t('profile')}</span>
+        </button>
+        <button class="btn icon-text-btn" on:click={() => goto('/catalog')}>
+          <img src="/assets/icons/catalog.png" alt="{$t('catalog')}" />
+          <span class="btn-label">{$t('catalog')}</span>
+        </button>
+        <button class="btn icon-text-btn" on:click={() => goto('/market')}>
+          <img src="/assets/icons/market.png" alt="{$t('market')}" />
+          <span class="btn-label">{$t('market')}</span>
+        </button>
+      </div>
+      <div class="menu-group help-group">
+        <button class="btn icon-btn" title="{$t('help')}" aria-label="{$t('help')}">
+          <img src="/assets/icons/help.png" alt="{$t('help')}" />
+        </button>
+        <button class="btn icon-btn" on:click={() => goto('/settings')} title="{$t('settings')}" aria-label="{$t('settings')}">
+          <img src="/assets/icons/settings.png" alt="{$t('settings')}" />
+        </button>
+        <button class="btn logout-btn" on:click={logoutHandler}>{$t('logout')}</button>
+      </div>
     </div>
   {/if}
 </div>
