@@ -6,6 +6,7 @@
   import { get } from 'svelte/store';
   import { t } from 'svelte-i18n';
   import type { RealtimeChannel } from '@supabase/supabase-js';
+  import { updateUserXp } from '$lib/xpUtils';
 
   /* =====================
    * 1) 돌 정보 & 성장 로직
@@ -258,6 +259,8 @@
         return { ...stone, baseSize: newSize, totalElapsed: oldElapsed + 1 };
       });
       autoUpdateStone();
+      // xp 업데이트 (매 초마다 1xp 증가 및 레벨 체크)
+      updateUserXp();
 
       // 남은 시간 1초 감소 (돌을 성장시키는 동안에만 시간 감소)
       if (countdown > 0) {

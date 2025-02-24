@@ -35,5 +35,8 @@
     "tuff": "Tuff"
   },
   "linkCopied": "Link copied!",
-  "comingSoon": "Coming soon."
+  "comingSoon": "Coming soon.",
+  "level": "Level",
+  "xpLabel": "XP:",
+  "totalXp": "Total XP"
 }
