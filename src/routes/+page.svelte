@@ -314,12 +314,27 @@
   });
 
   async function logoutHandler() {
+    // 현재 세션 확인
+    const sessionResponse = await supabase.auth.getSession();
+    if (!sessionResponse.data.session) {
+      console.log("현재 활성화된 세션이 없습니다. 이미 로그아웃 상태입니다.");
+      goto('/login'); // 이미 로그아웃된 경우 로그인 화면으로 이동
+      return;
+    }
+    
+    // 세션이 존재할 경우 로그아웃 요청 실행
     const { error } = await supabase.auth.signOut();
     if (error) {
+      // 만약 "Auth session missing!" 오류가 발생하면 이미 로그아웃된 것으로 간주
+      if (error.message === "Auth session missing!") {
+        console.log("세션이 이미 만료되었거나 존재하지 않습니다. 로그인 페이지로 이동합니다.");
+        goto('/login');
+        return;
+      }
       console.error("로그아웃 실패:", error.message);
     } else {
       console.log("로그아웃 성공");
-      goto('/login'); // 로그아웃 후 로그인 페이지로 이동
+      goto('/login'); // 로그아웃 성공 시 로그인 페이지로 이동
     }
   }
 

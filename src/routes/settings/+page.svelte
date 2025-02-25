@@ -2,6 +2,7 @@
   import { goto } from '$app/navigation';
   import { setLanguage } from '$lib/i18n';
   import { t } from 'svelte-i18n';
+  import { showDeleteWarning } from '$lib/settingsStore';
 </script>
 
 <div class="settings-container">
@@ -11,6 +12,14 @@
     <h2>{$t('languageSettings')}</h2>
     <button class="btn" on:click={() => setLanguage('en')}>English</button>
     <button class="btn" on:click={() => setLanguage('ko')}>한국어</button>
+  </div>
+
+  <div class="delete-warning-settings">
+    <h2>{$t('deleteWarningSetting')}</h2>
+    <label>
+      <input type="checkbox" bind:checked={$showDeleteWarning} />
+      {$t('enableDeleteWarning')}
+    </label>
   </div>
 </div>
 
@@ -24,7 +33,8 @@
     padding: 1rem;
     text-align: center;
   }
-  .language-settings {
+  .language-settings,
+  .delete-warning-settings {
     margin: 1rem 0;
   }
 

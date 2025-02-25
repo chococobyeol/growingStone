@@ -6,6 +6,7 @@
   import { get } from 'svelte/store';
   import { t } from 'svelte-i18n';
   import type { RealtimeChannel } from '@supabase/supabase-js';
+  import { showDeleteWarning } from '$lib/settingsStore';
 
   // DB에 저장된 돌 데이터 타입 (DB의 size는 현재 돌의 baseSize에 해당)
   type Stone = {
@@ -42,60 +43,76 @@
 
   // 불러오기(스왑) 버튼 클릭 시, 현재 돌과 저장된 돌을 서로 교환합니다.
   async function swapStone(stone: Stone) {
-    const current = get(currentStone);
-    const updateForCurrent = {
-      type: stone.type,
-      size: stone.size,
-      name: stone.name,
-      totalElapsed: stone.totalElapsed || 0,
-      discovered_at: new Date().toISOString()
-    };
-    const updateForStored = {
-      type: current.type,
-      size: current.baseSize,
-      name: current.name,
-      totalElapsed: current.totalElapsed || 0,
-      discovered_at: new Date().toISOString()
-    };
+    try {
+      const current = get(currentStone);
+      const updateForCurrent = {
+        type: stone.type,
+        size: stone.size,
+        name: stone.name,
+        totalElapsed: stone.totalElapsed || 0,
+        discovered_at: new Date().toISOString()
+      };
+      const updateForStored = {
+        type: current.type,
+        size: current.baseSize,
+        name: current.name,
+        totalElapsed: current.totalElapsed || 0,
+        discovered_at: new Date().toISOString()
+      };
 
-    const { error: errorCurrent } = await supabase
-      .from('stones')
-      .update(updateForCurrent)
-      .eq('id', current.id);
-    if (errorCurrent) {
-      errorMsg = errorCurrent.message;
-      return;
+      // 현재 돌 업데이트
+      const { error: errorCurrent } = await supabase
+        .from('stones')
+        .update(updateForCurrent)
+        .eq('id', current.id);
+      if (errorCurrent) {
+        throw new Error(errorCurrent.message);
+      }
+
+      // 선택한 돌 업데이트
+      const { error: errorStored } = await supabase
+        .from('stones')
+        .update(updateForStored)
+        .eq('id', stone.id);
+      if (errorStored) {
+        // 여기서 롤백하는 로직을 추가할 수 있음 (예: 다시 current 돌을 원래대로 복구)
+        throw new Error(errorStored.message);
+      }
+
+      // 클라이언트 상태 업데이트
+      currentStone.set({
+        id: stone.id,
+        type: stone.type,
+        baseSize: stone.size,
+        totalElapsed: stone.totalElapsed || 0,
+        name: stone.name
+      });
+      await loadStoredStones();
+      goto('/');
+    } catch (error) {
+      errorMsg = (error as Error).message;
+      // 추가: 사용자에게 에러 메시지를 표시하고, 필요시 상태 롤백 처리를 구현
     }
-
-    const { error: errorStored } = await supabase
-      .from('stones')
-      .update(updateForStored)
-      .eq('id', stone.id);
-    if (errorStored) {
-      errorMsg = errorStored.message;
-      return;
-    }
-
-    currentStone.set({
-      id: stone.id,
-      type: stone.type,
-      baseSize: stone.size,
-      totalElapsed: stone.totalElapsed || 0,
-      name: stone.name
-    });
-    loadStoredStones();
-    goto('/');
   }
 
   async function deleteStone(stone: Stone) {
-    const { error } = await supabase
-      .from('stones')
-      .delete()
-      .eq('id', stone.id);
-    if (error) {
-      errorMsg = error.message;
-    } else {
-      loadStoredStones();
+    const translate = get(t);
+    // 삭제 경고 설정이 true일 경우에만 확인 대화상자를 표시합니다.
+    if (get(showDeleteWarning)) {
+      if (!confirm(translate('deleteStoneConfirm'))) return;
+    }
+    try {
+      const { error } = await supabase
+        .from('stones')
+        .delete()
+        .eq('id', stone.id);
+      if (error) {
+        throw new Error(error.message);
+      }
+      await loadStoredStones();
+    } catch (error) {
+      errorMsg = (error as Error).message;
+      // 에러 발생 시 사용자에게 알림
     }
   }
 
