@@ -57,15 +57,15 @@
   "deleteWarningSetting": "Deletion Warning Settings",
   "enableDeleteWarning": "Enable delete warning",
   "stoneDescriptions": {
-    "andesite": "Andesite is a volcanic rock formed when lava cools quickly after an eruption. It has a fine, detailed texture with a natural medium tone, making it perfect for backgrounds and decorative elements in your game.",
-    "basalt": "Basalt is a dark rock created from lava that cools very quickly, resulting in a tough and uniform texture. Its strength makes it ideal for solid structures and reliable building materials in your game.",
-    "conglomerate": "Conglomerate is a sedimentary rock made of various rounded rock pieces that stick together. Its naturally worn look gives a sense of history, adding a unique touch to game environments.",
-    "gneiss": "Gneiss is a metamorphic rock known for its striking, banded patterns formed under heat and pressure over time. Its cool stripes make it a great design element for creative game scenes.",
-    "granite": "Granite is a durable rock that forms deep underground as magma cools slowly, resulting in large, visible crystals. Its robust and classic appearance makes it popular for construction and decorative features.",
-    "limestone": "Limestone is a sedimentary rock made from the remains of sea creatures. With its smooth surface and occasional fossils, it offers a natural, earthy vibe perfect for realistic scenery.",
-    "quartzite": "Quartzite is a very hard metamorphic rock formed from quartz-rich sandstone. Its sparkling, resilient surface makes it ideal for areas needing extra toughness and visual appeal.",
-    "sandstone": "Sandstone is formed from compressed sand particles and comes in a range of colors and textures. Its warm, natural look is great for creating realistic landscapes in your game.",
-    "shale": "Shale is a fine-grained sedimentary rock that splits into thin layers. Made from compacted clay and silt, it gives a delicate, layered look that adds depth to game worlds.",
-    "tuff": "Tuff is a volcanic rock formed from compacted volcanic ash after an eruption. Its lightweight and porous nature, along with its unique texture, make it a fun choice for creative and dynamic scenes."
+    "andesite": "Andesite is a volcanic rock formed when lava cools quickly after an eruption. It features a fine crystal structure and usually displays a range of gray tones. Composed mainly of plagioclase and pyroxene, it offers a balanced strength and durability.",
+    "basalt": "Basalt is a dark igneous rock created when lava cools very rapidly. Its texture is uniform due to tightly packed tiny crystals, giving it exceptional toughness and making it one of the most common rocks in the Earth’s crust.",
+    "conglomerate": "Conglomerate is a sedimentary rock made up of various rounded rock fragments and gravel, naturally cemented together by sand and clay. The mix of different sized clasts tells a story of long-term erosion and transport in dynamic environments.",
+    "gneiss": "Gneiss is a metamorphic rock formed from pre-existing rocks that have been subjected to high temperatures and pressures over time. It is characterized by striking banded patterns with minerals aligned in distinct layers, reflecting its transformation history.",
+    "granite": "Granite is an intrusive igneous rock that forms deep underground as magma cools slowly. It contains visible crystals of quartz, feldspar, and mica, resulting in a very hard and durable rock that stands the test of time.",
+    "limestone": "Limestone is a sedimentary rock primarily composed of calcite, formed from the accumulation of marine organisms' remains such as shells and corals. Its smooth texture and occasional fossil traces capture the essence of ancient sea environments.",
+    "quartzite": "Quartzite is a hard metamorphic rock formed from quartz-rich sandstone that has been transformed by intense heat and pressure. Its shiny, dense surface and excellent resistance to weathering make it one of nature’s toughest rocks.",
+    "sandstone": "Sandstone is a sedimentary rock formed by the gradual compaction and cementation of sand particles. It comes in a variety of colors and textures, with its appearance reflecting the conditions of its formation over time.",
+    "shale": "Shale is a fine-grained sedimentary rock composed of compacted clay and silt. Known for its tendency to split into thin layers, it provides clear evidence of slow, quiet deposition in low-energy environments.",
+    "tuff": "Tuff is a type of rock formed from volcanic ash and debris that have been compacted and solidified after an eruption. Its porous and irregular texture, along with its varied coloration, reflects the explosive nature of its volcanic origin."
   }
 }
