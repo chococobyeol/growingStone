@@ -1,15 +1,15 @@
 <script lang="ts">
+  export let data: {
+    profileData: { xp: number; level: number } | null,
+    userXpData: { level: number; nextRequiredXp: number; cumulativeXp: number }[]
+  };
+
   import { goto } from '$app/navigation';
   import { t } from 'svelte-i18n';
-  import { onMount } from 'svelte';
-  import { supabase } from '$lib/supabaseClient';
-  import { loadUserXpData, userXpData } from '$lib/xpUtils';
 
   // 사용자 프로필 정보 변수들
   let userLevel = 1;
   let userXp = 0;
-
-  // currentXpProgress: 현재 레벨에서 획득한 xp, levelRequirement: 현재 레벨에서 다음 레벨까지 필요한 xp
   let baseXp = 0;
   let levelRequirement = 0;
   let currentXpProgress = 0;
@@ -20,39 +20,26 @@
     cumulativeXp: number;
   };
 
-  onMount(async () => {
-    // CSV 파일에서 xp 데이터 로드 (레벨별 누적 xp 임계치 등)
-    await loadUserXpData();
-    // 현재 사용자 프로필의 xp와 level 정보를 불러옴
-    const { data: sessionData } = await supabase.auth.getSession();
-    if (sessionData?.session?.user) {
-      const userId = sessionData.session.user.id;
-      const { data: profileData } = await supabase
-        .from('profiles')
-        .select('xp, level')
-        .eq('id', userId)
-        .maybeSingle();
-      if (profileData) {
-        userLevel = profileData.level;
-        userXp = profileData.xp;
-        // userXpData 배열에서 현재 레벨의 데이터 찾기 (현재 레벨의 cumulativeXp를 기준으로 함)
-        const currentLevelData = userXpData.find((item: UserXpEntry) => item.level === userLevel);
-        if (currentLevelData) {
-          // 레벨이 1보다 크면 이전 레벨의 누적 xp가 baseXp가 됨 (없으면 0)
-          if (userLevel > 1) {
-            const previousLevelData = userXpData.find((item: UserXpEntry) => item.level === userLevel - 1);
-            baseXp = previousLevelData ? previousLevelData.cumulativeXp : 0;
-          } else {
-            baseXp = 0;
-          }
-          // 현재 레벨에서 다음 레벨까지 필요한 xp는 현재 레벨의 누적 xp에서 baseXp를 뺀 값
-          levelRequirement = currentLevelData.cumulativeXp - baseXp;
-          // 현재 레벨에서 획득한 xp는 전체 누적 xp에서 baseXp만큼 차감한 값
-          currentXpProgress = userXp - baseXp;
-        }
+  if (data.profileData) {
+    userLevel = data.profileData.level;
+    userXp = data.profileData.xp;
+    
+    // userXpData 배열에서 현재 레벨의 데이터 찾기 (현재 레벨의 cumulativeXp를 기준으로 함)
+    const currentLevelData = data.userXpData.find((item: UserXpEntry) => item.level === userLevel);
+    if (currentLevelData) {
+      // 레벨이 1보다 크면 이전 레벨의 누적 xp가 baseXp가 됨 (없으면 0)
+      if (userLevel > 1) {
+        const previousLevelData = data.userXpData.find((item: UserXpEntry) => item.level === userLevel - 1);
+        baseXp = previousLevelData ? previousLevelData.cumulativeXp : 0;
+      } else {
+        baseXp = 0;
       }
+      // 현재 레벨에서 다음 레벨까지 필요한 xp는 현재 레벨의 누적 xp에서 baseXp를 뺀 값
+      levelRequirement = currentLevelData.cumulativeXp - baseXp;
+      // 현재 레벨에서 획득한 xp는 전체 누적 xp에서 baseXp를 차감한 값
+      currentXpProgress = userXp - baseXp;
     }
-  });
+  }
 </script>
 
 <div class="profile-container">
@@ -70,7 +57,7 @@
   </div>
 </div>
 
-<!-- settings, help 페이지와 동일한 뒤로가기 버튼 스타일 -->
+<!-- 뒤로가기 버튼 -->
 <button class="back-btn" on:click={() => goto('/')}>{$t('backButton')}</button>
 
 <style>
