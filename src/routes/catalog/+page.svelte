@@ -74,7 +74,9 @@
             <img 
               src={`/assets/img/common/${stone.stone_type}.png`} 
               alt={$t(`stoneTypes.${stone.stone_type}`)} />
-            <p class="stone-type">{$t(`stoneTypes.${stone.stone_type}`)}</p>
+            <p class="stone-type {($t(`stoneTypes.${stone.stone_type}`)).length > 10 ? 'small-text' : ''}">
+              {$t(`stoneTypes.${stone.stone_type}`)}
+            </p>
           </button>
         {/each}
       </div>
@@ -200,6 +202,12 @@
   .stone-type {
     font-weight: bold;
     margin-top: 0.1rem;
+    font-size: 1rem;
+    white-space: normal;
+    word-wrap: break-word;
+  }
+  .small-text {
+    font-size: 0.7rem;
   }
   .stone-description {
     max-height: 150px;
