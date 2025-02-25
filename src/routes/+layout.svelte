@@ -32,8 +32,8 @@
 	  unsubscribe();
 	});
   
-	// 인증 전용 페이지 리스트
-	const authRoutes = ['/login', '/register', '/guest'];
+	// 인증 전용 페이지 리스트에서 '/guest' 제거
+	const authRoutes = ['/login', '/register'];
   
 	async function logout() {
 	  const { data: sessionData } = await supabase.auth.getSession();
@@ -144,12 +144,14 @@
     <!-- 이외의 경우(예, 루트 경로("/")에 접근 시 user가 없으면) -->
     <div class="landing-page">
       <div class="landing-card">
-        <h1>{$t('landingTitle')}</h1>
+        <h1 class="landing-title">
+          <img src="/assets/icons/growstoneicon.png" alt="돌 키우기 아이콘" class="landing-icon" />
+          <span>{$t('landingTitle')}</span>
+        </h1>
         <p>{$t('landingDescription')}</p>
         <div class="landing-buttons">
           <a class="btn" href="/login">{$t('login')}</a>
           <a class="btn" href="/register">{$t('register')}</a>
-          <a class="btn" href="/guest">{$t('guest')}</a>
         </div>
         <div class="language-settings">
           <span>{$t('languageSettingsTitle')}</span>
@@ -181,9 +183,22 @@
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     text-align: center;
   }
-  .landing-card h1 {
-    margin-bottom: 1rem;
+  .landing-title {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     font-size: 2rem;
+    margin-bottom: 1rem;
+  }
+ /* 타이틀 텍스트 오른쪽 여백 조정 */
+  .landing-title span {
+    margin-right: 3.8rem;
+  }
+  .landing-icon {
+    width: 60px;
+    height: 60px;
+    margin-right: 1rem;
+    vertical-align: middle;
   }
   .landing-card p {
     margin-bottom: 1.5rem;
