@@ -7,6 +7,7 @@
   import { t } from 'svelte-i18n';
   import type { RealtimeChannel } from '@supabase/supabase-js';
   import { updateUserXp } from '$lib/xpUtils';
+  import { recordAcquiredStone } from '$lib/stoneCatalogUtils';
 
   /* =====================
    * 1) 돌 정보 & 성장 로직
@@ -137,6 +138,7 @@
       user_id: sessionData.session.user.id,
       totalElapsed: 0
     };
+
     const { data, error } = await supabase.from('stones').insert(newStone).select();
     if (error) {
       console.error("돌 뽑기 실패:", error);
@@ -150,6 +152,9 @@
         name: createdStone.name
       });
       computedSize = createdStone.size;
+
+      // acquired_stones 테이블에도 기록을 남기도록 호출
+      await recordAcquiredStone(createdStone.type);
     }
   }
 
@@ -367,6 +372,8 @@
       console.error("돌 뽑기 실패:", error);
     } else {
       console.log("돌 뽑기 성공:", data);
+      // 돌 뽑기에 성공하면 도감 기록도 업데이트합니다.
+      await recordAcquiredStone(randomType);
     }
   }
 

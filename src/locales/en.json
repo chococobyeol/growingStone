@@ -34,6 +34,8 @@
     "shale": "Shale",
     "tuff": "Tuff"
   },
+  "acquiredCount": "Acquired Count",
+  "createdAt": "First Discovery",
   "linkCopied": "Link copied!",
   "comingSoon": "Coming soon.",
   "level": "Level",
@@ -53,5 +55,17 @@
   "noAccount": "Don't have an account?",
   "deleteStoneConfirm": "Are you sure you want to delete this stone?",
   "deleteWarningSetting": "Deletion Warning Settings",
-  "enableDeleteWarning": "Enable delete warning"
+  "enableDeleteWarning": "Enable delete warning",
+  "stoneDescriptions": {
+    "andesite": "Andesite is a volcanic rock formed when lava cools quickly after an eruption. It has a fine, detailed texture with a natural medium tone, making it perfect for backgrounds and decorative elements in your game.",
+    "basalt": "Basalt is a dark rock created from lava that cools very quickly, resulting in a tough and uniform texture. Its strength makes it ideal for solid structures and reliable building materials in your game.",
+    "conglomerate": "Conglomerate is a sedimentary rock made of various rounded rock pieces that stick together. Its naturally worn look gives a sense of history, adding a unique touch to game environments.",
+    "gneiss": "Gneiss is a metamorphic rock known for its striking, banded patterns formed under heat and pressure over time. Its cool stripes make it a great design element for creative game scenes.",
+    "granite": "Granite is a durable rock that forms deep underground as magma cools slowly, resulting in large, visible crystals. Its robust and classic appearance makes it popular for construction and decorative features.",
+    "limestone": "Limestone is a sedimentary rock made from the remains of sea creatures. With its smooth surface and occasional fossils, it offers a natural, earthy vibe perfect for realistic scenery.",
+    "quartzite": "Quartzite is a very hard metamorphic rock formed from quartz-rich sandstone. Its sparkling, resilient surface makes it ideal for areas needing extra toughness and visual appeal.",
+    "sandstone": "Sandstone is formed from compressed sand particles and comes in a range of colors and textures. Its warm, natural look is great for creating realistic landscapes in your game.",
+    "shale": "Shale is a fine-grained sedimentary rock that splits into thin layers. Made from compacted clay and silt, it gives a delicate, layered look that adds depth to game worlds.",
+    "tuff": "Tuff is a volcanic rock formed from compacted volcanic ash after an eruption. Its lightweight and porous nature, along with its unique texture, make it a fun choice for creative and dynamic scenes."
+  }
 }
