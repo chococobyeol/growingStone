@@ -8,6 +8,7 @@
   import type { RealtimeChannel } from '@supabase/supabase-js';
   import { updateUserXp } from '$lib/xpUtils';
   import { recordAcquiredStone } from '$lib/stoneCatalogUtils';
+  import { checkAttendance } from '$lib/attendanceUtils';
 
   /* =====================
    * 1) 돌 정보 & 성장 로직
@@ -30,21 +31,29 @@
   // countdown은 DB에 저장된 remaining_time 값을 사용 (초 단위)
   let countdown = 0;
 
+  // 자금(balance)을 저장할 변수 (단위: stone)
+  let balance: number = 0;
+
+  let attendanceMsg: string = "";
+  let copyMessage: string = "";
+
   function formatSize(num: number) {
     return num.toFixed(4);
   }
 
-  // 초 단위의 시간을 "HH:MM:SS" 형식으로 변환하는 함수 (예: 01:23:45)
+  // 초 단위의 시간을 "HH:MM:SS" 형식으로 변환 (예: 01:23:45)
   function formatTime(totalSeconds: number): string {
     const hours = Math.floor(totalSeconds / 3600);
     const minutes = Math.floor((totalSeconds % 3600) / 60);
     const seconds = totalSeconds % 60;
-    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    return `${hours.toString().padStart(2, '0')}:${minutes
+      .toString()
+      .padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
   }
 
   function randomizeStone() {
     const randomType = stoneTypes[Math.floor(Math.random() * stoneTypes.length)];
-    currentStone.update(stone => ({
+    currentStone.update((stone) => ({
       ...stone,
       type: randomType,
       baseSize: 1,
@@ -112,7 +121,7 @@
         currentStone.set(loadedStone);
         computedSize = loadedStone.baseSize;
       } else {
-        // 저장된 돌이 없으면 drawStone을 호출하여 새 돌을 뽑고 currentStone에 설정하도록 처리
+        // 저장된 돌이 없으면 drawStone을 호출하여 새 돌을 뽑아 currentStone에 설정
         await drawStoneAndSetCurrent();
       }
     }
@@ -153,7 +162,7 @@
       });
       computedSize = createdStone.size;
 
-      // acquired_stones 테이블에도 기록을 남기도록 호출
+      // acquired_stones 테이블에도 기록
       await recordAcquiredStone(createdStone.type);
     }
   }
@@ -188,7 +197,7 @@
   }
 
   /* =====================
-   * 5) 타이머 관련 DB 연동 함수 (프로필 테이블의 remaining_time 사용)
+   * 5) 타이머 관련 DB 연동 함수 (profiles.remaining_time 사용)
    * ===================== */
   async function loadRemainingTime(): Promise<number | null> {
     const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
@@ -233,13 +242,49 @@
     }
   }
 
+  // ── 추가: 자금(balance) 불러오기 함수 ──────────────────────────────
+  async function loadBalance(): Promise<void> {
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+    if (sessionError) {
+      console.error("세션 로드 실패 (balance):", sessionError);
+      return;
+    }
+    if (!sessionData?.session?.user) {
+      console.error("로그인된 사용자가 없습니다. (balance)");
+      return;
+    }
+    const userId = sessionData.session.user.id;
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('balance')
+      .eq('id', userId)
+      .single();
+    if (error) {
+      console.error("자금 불러오기 실패:", error);
+      return;
+    }
+    balance = data.balance ? Number(data.balance) : 0;
+  }
+
   /* =====================
-   * 6) onMount - 돌 성장 및 타이머 로직 (페이지 활성상태일 때만 시간 진행)
+   * 6) onMount - 돌 성장, 타이머, 출석 체크 로직
    * ===================== */
   let stonesSubscription: RealtimeChannel;
 
   onMount(() => {
     loadUserStone();
+
+    // 출석 체크 후 다국어 메시지를 인스턴스 메시지로 표시
+    (async () => {
+      const attendanceRes = await checkAttendance();
+      if (attendanceRes.message) {
+        attendanceMsg = get(t)(attendanceRes.message);
+        setTimeout(() => {
+          attendanceMsg = "";
+        }, 3000);
+      }
+      await loadBalance();
+    })();
 
     // DB에서 남은 시간을 로드. 값이 없거나 0 이하이면 3600초(1시간)로 초기화.
     (async () => {
@@ -252,10 +297,9 @@
       }
     })();
 
-    // 1초마다 돌을 성장시키고, 남은 시간을 1초씩 감소시킵니다.
+    // 1초마다 돌 성장, xp 업데이트, 타이머 감소 로직
     const timer = setInterval(() => {
-      // 돌 성장 업데이트
-      currentStone.update(stone => {
+      currentStone.update((stone) => {
         const oldElapsed = stone.totalElapsed || 0;
         const deltaX = growthFactor * Math.log((oldElapsed + 2) / (oldElapsed + 1));
         const randomFactor = 0.4 * Math.random() + 0.8;
@@ -264,15 +308,13 @@
         return { ...stone, baseSize: newSize, totalElapsed: oldElapsed + 1 };
       });
       autoUpdateStone();
-      // xp 업데이트 (매 초마다 1xp 증가 및 레벨 체크)
       updateUserXp();
 
-      // 남은 시간 1초 감소 (돌을 성장시키는 동안에만 시간 감소)
       if (countdown > 0) {
         countdown--;
         updateRemainingTime(countdown);
         if (countdown <= 0) {
-          // 남은 시간이 0이 되면 돌 뽑기 실행 후 3600초(1시간)로 리셋
+          // 시간이 다 되면 새 돌 뽑기 후 타이머 리셋
           drawStone().then(() => {
             countdown = 3600;
             updateRemainingTime(3600);
@@ -281,11 +323,8 @@
       }
     }, 1000);
 
-    // 현재 로그인 사용자의 ID 등을 사용해 구독 범위를 제한할 수도 있음.
-    // 예를 들어, userId 필드를 조건으로 걸어 줄 수 있습니다.
+    // Supabase realtime 채널 구독 (현재 돌 업데이트)
     const stoneId = get(currentStone).id;
-
-    // Supabase v2의 realtime 채널 API 사용
     stonesSubscription = supabase
       .channel('stone-updates')
       .on(
@@ -319,18 +358,15 @@
   });
 
   async function logoutHandler() {
-    // 현재 세션 확인
     const sessionResponse = await supabase.auth.getSession();
     if (!sessionResponse.data.session) {
       console.log("현재 활성화된 세션이 없습니다. 이미 로그아웃 상태입니다.");
-      goto('/login'); // 이미 로그아웃된 경우 로그인 화면으로 이동
+      goto('/login');
       return;
     }
-    
-    // 세션이 존재할 경우 로그아웃 요청 실행
+
     const { error } = await supabase.auth.signOut();
     if (error) {
-      // 만약 "Auth session missing!" 오류가 발생하면 이미 로그아웃된 것으로 간주
       if (error.message === "Auth session missing!") {
         console.log("세션이 이미 만료되었거나 존재하지 않습니다. 로그인 페이지로 이동합니다.");
         goto('/login');
@@ -339,7 +375,7 @@
       console.error("로그아웃 실패:", error.message);
     } else {
       console.log("로그아웃 성공");
-      goto('/login'); // 로그아웃 성공 시 로그인 페이지로 이동
+      goto('/login');
     }
   }
 
@@ -372,17 +408,14 @@
       console.error("돌 뽑기 실패:", error);
     } else {
       console.log("돌 뽑기 성공:", data);
-      // 돌 뽑기에 성공하면 도감 기록도 업데이트합니다.
       await recordAcquiredStone(randomType);
     }
   }
 
-  let copyMessage: string = '';
-
   function handleShare(): void {
     navigator.clipboard.writeText(window.location.href)
       .then(() => {
-        copyMessage = $t('linkCopied'); // 다국어 번역에 등록된 메시지 사용
+        copyMessage = $t('linkCopied');
         setTimeout(() => {
           copyMessage = "";
         }, 3000);
@@ -498,7 +531,7 @@
     border: none;
     padding: 0;
     margin: 0;
-    font-size: 2rem; /* 원하는 크기로 조정 */
+    font-size: 2rem;
     font-weight: bold;
     text-align: center;
     cursor: pointer;
@@ -511,8 +544,6 @@
   .btn.logout-btn:hover {
     background-color: #E27675;
   }
-
-  /* 아이콘 버튼 관련 스타일 */
   .icon-btn {
     padding: 0.25rem 0.5rem;
     display: flex;
@@ -520,31 +551,24 @@
     justify-content: center;
     background-color: #fff !important;
   }
-  
   .icon-btn img {
     display: block;
-    width: 20px;  /* 버튼 크기에 맞게 조정 (필요시 수정) */
+    width: 20px;
     height: 20px;
   }
-
-  /* 설정/도움말 버튼의 테두리 제거 */
   .btn.icon-btn {
     border: none !important;
   }
-
-  /* help-group 내의 버튼 간격 줄이기 */
   .menu-group.help-group .btn {
-    margin: 0.1rem; /* 각 버튼의 외부 여백도 줄임 */
+    margin: 0.1rem;
   }
-
-  /* 보관함/마켓 (아이콘 텍스트 버튼) 스타일 수정 */
   .icon-text-btn {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    width: 60px;           /* 정사각형 버튼 너비 */
-    height: 60px;          /* 정사각형 버튼 높이 */
+    width: 60px;
+    height: 60px;
     background-color: #fff;
     margin: 0.1rem;
     border: 1px solid #CCC;
@@ -553,28 +577,22 @@
     transition: background-color 0.3s;
     box-sizing: border-box;
   }
-  
   .icon-text-btn:hover {
     background-color: #f7f7f7;
   }
-  
   .icon-text-btn img {
     display: block;
-    width: 34px;           /* 아이콘 이미지 크기 확대 */
+    width: 34px;
     height: 34px;
   }
-  
   .btn-label {
     font-size: 0.8rem;
     margin-top: 0.25rem;
     color: #000;
   }
-
-  /* 보관함/마켓 버튼의 패딩을 줄여서 내부 여백을 축소 */
   .btn.icon-text-btn {
     padding: 0.1rem !important;
   }
-
   .copy-message {
     position: fixed;
     bottom: 20px;
@@ -586,6 +604,48 @@
     border-radius: 4px;
     z-index: 1000;
     font-size: 0.9rem;
+  }
+  /* ── 자금(스톤) 표시 영역 스타일 수정 (회색 배경, 영역 높이 감소) ───────────────────────── */
+  .balance-display {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 0.5rem;
+    background: #fff;
+    padding-right: 0.5rem;
+    padding-left: 0.5rem;
+    margin-top: 1.0rem;
+    margin-bottom: 1.0rem;
+    border-radius: 20px;
+    border: 1px solid #ddd;
+    line-height: 1;
+  }
+  .balance-icon {
+    width: 24px;
+    height: 24px;
+    margin-right: 0.2rem;
+  }
+  .balance-display span {
+    font-size: 1.0rem;
+    line-height: 1;
+  }
+  /* 좁은 화면에서는 자금 표시 영역은 전체 너비로 내려옴 */
+  @media (max-width: 600px) {
+    .menu-group.storage-group {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.5rem;
+      justify-content: center;
+    }
+    .menu-group.storage-group button {
+      flex: 0 0 auto;
+    }
+    .menu-group.storage-group .balance-display {
+      flex-basis: 40%;
+      display: flex;
+      justify-content: center;
+      margin-top: 0.5rem;
+    }
   }
 </style>
 
@@ -643,6 +703,15 @@
           <img src="/assets/icons/market.png" alt="{$t('market')}" />
           <span class="btn-label">{$t('market')}</span>
         </button>
+        <div class="balance-display">
+          <img
+            src="/assets/icons/stone.png"
+            alt={$t('stone')}
+            class="balance-icon"
+            title={$t('stone')}
+          />
+          <span>{balance.toLocaleString()}</span>
+        </div>
       </div>
       <div class="menu-group help-group">
         <button class="btn icon-btn" title="{$t('share')}" aria-label="{$t('share')}" on:click={handleShare}>
@@ -662,4 +731,8 @@
 
 {#if copyMessage}
   <div class="copy-message">{copyMessage}</div>
+{/if}
+
+{#if attendanceMsg}
+  <div class="copy-message">{attendanceMsg}</div>
 {/if}
