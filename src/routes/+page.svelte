@@ -616,12 +616,12 @@
     margin-top: 1.0rem;
     margin-bottom: 1.0rem;
     border-radius: 20px;
-    border: 1px solid #ddd;
+    border: 1px solid #ccc;
     line-height: 1;
   }
   .balance-icon {
-    width: 24px;
-    height: 24px;
+    width: 2rem;
+    height: 2rem;
     margin-right: 0.2rem;
   }
   .balance-display span {
